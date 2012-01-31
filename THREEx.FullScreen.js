@@ -12,7 +12,7 @@
 //
 
 /** @namespace */
-var THREEx		= THREEx 		|| {};
+var THREEx		= THREEx		|| {};
 THREEx.FullScreen	= THREEx.FullScreen	|| {};
 
 /**
@@ -83,14 +83,15 @@ THREEx.FullScreen.bindKey	= function(opts){
 	opts		= opts		|| {};
 	var charCode	= opts.charCode	|| 'f'.charCodeAt(0);
 	var dblclick	= opts.dblclick !== undefined ? opts.dblclick : false;
-	var element	= opts.element
+	var element	= opts.element;
+	var bindElement = opts.bindElement || opts.element || document;
 
 	var toggle	= function(){
 		if( THREEx.FullScreen.activated() ){
 			THREEx.FullScreen.cancel();
 		}else{
 			THREEx.FullScreen.request(element);
-		}		
+		}
 	}
 
 	// callback to handle keypress
@@ -103,14 +104,14 @@ THREEx.FullScreen.bindKey	= function(opts){
 
 	// listen to keypress
 	// NOTE: for firefox it seems mandatory to listen to document directly
-	document.addEventListener('keypress', onKeyPress, false);
+	bindElement.addEventListener('keypress', onKeyPress, false);
 	// listen to dblclick
-	dblclick && document.addEventListener('dblclick', toggle, false);
+	dblclick && bindElement.addEventListener('dblclick', toggle, false);
 
 	return {
 		unbind	: function(){
-			document.removeEventListener('keypress', onKeyPress, false);
-			dblclick && document.removeEventListener('dblclick', toggle, false);
+			bindElement.removeEventListener('keypress', onKeyPress, false);
+			dblclick && bindElement.removeEventListener('dblclick', toggle, false);
 		}
 	};
 }
