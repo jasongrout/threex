@@ -65,19 +65,37 @@ var THREEx	= THREEx 		|| {};
 			var offsetY	= (canvas.height - scaled.height)/2;
 			ctx.drawImage(image, offsetX, offsetY, scaled.width, scaled.height);
 
-			// dump the canvas to an URL		
+			// dump the canvas to an URL
 			var mimetype	= "image/png";
 			var newDataUrl	= canvas.toDataURL(mimetype);
 			// notify the url to the caller
 			callback && callback(newDataUrl)
-		}.bind(this);
+		};//.bind(this);
 
 		// Create new Image object
 		var image 	= new Image();
 		image.onload	= onLoad;
 		image.src	= srcUrl;
 	}
-	
+    var that=this;
+    var doScreenshot = function(renderer, opts) {
+	opts		= opts		|| {};
+	var width	= opts.width;
+	var height	= opts.height;
+	var callback	= opts.callback	|| function(url){
+	    window.open(url, "name-"+Math.random());
+	};
+
+        var dataUrl	= this.toDataURL(renderer);
+
+	if( width === undefined && height === undefined ){
+	    callback( dataUrl )
+	}else{
+	    // resize it and notify the callback
+	    // * resize == async so if callback is a window open, it triggers the pop blocker
+	    _aspectResize(dataUrl, width, height, callback);
+	}
+    };
 
 	// Super cooked function: THREEx.Screenshot.bindKey(renderer)
 	// and you are done to get screenshot on your demo
@@ -89,27 +107,13 @@ var THREEx	= THREEx 		|| {};
 		// handle parameters
 		opts		= opts		|| {};
 		var charCode	= opts.charCode	|| 'p'.charCodeAt(0);
-		var width	= opts.width;
-		var height	= opts.height;
-		var callback	= opts.callback	|| function(url){
-			window.open(url, "name-"+Math.random());
-		};
 
 		// callback to handle keypress
-		var onKeyPress	= function(event){
-			// return now if the KeyPress isnt for the proper charCode
-			if( event.which !== charCode )	return;
-			// get the renderer output
-			var dataUrl	= this.toDataURL(renderer);
-
-			if( width === undefined && height === undefined ){
-				callback( dataUrl )
-			}else{
-				// resize it and notify the callback
-				// * resize == async so if callback is a window open, it triggers the pop blocker
-				_aspectResize(dataUrl, width, height, callback);				
-			}
-		}.bind(this);
+	    var onKeyPress	= function(event){
+		// return now if the KeyPress isnt for the proper charCode
+		if( event.which !== charCode )	return;
+                this.doScreenshot(renderer, opts);
+	    };
 
 		// listen to keypress
 		// NOTE: for firefox it seems mandatory to listen to document directly
@@ -122,9 +126,10 @@ var THREEx	= THREEx 		|| {};
 		};
 	}
 
-	// export it	
+	// export it
 	THREEx.Screenshot	= {
-		toDataURL	: toDataURL,
-		bindKey		: bindKey
+	    toDataURL	: toDataURL,
+	    bindKey		: bindKey,
+            doScreenshot    : doScreenshot
 	};
 })();
